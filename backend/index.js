@@ -34,7 +34,17 @@ app.use(cors({
 
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI);
+// MongoDB Connection with error handling
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Add connection event handlers
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+  console.log('Connected to MongoDB database');
+});
 
 // Project routes
 app.post('/api/projects', async (req, res) => {
