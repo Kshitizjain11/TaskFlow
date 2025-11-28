@@ -7,58 +7,10 @@ const Project = require('./models/Project');
 const Task = require('./models/Task');
 
 const app = express();
-
-// Configure CORS with allowed origins
-const allowedOrigins = [
-  'http://localhost:5173',  // Local development
-  'https://taskflowkj.netlify.app',  // Your Netlify domain
-  'https://taskflow-v4pt.onrender.com'  // Your Render backend domain
-];
-
-// Add a simple test route
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'API is running',
-    endpoints: ['/api/projects', '/api/tasks']
-  });
-});
-
-app.use(cors({
-  origin: function(origin, callback) {
-    console.log('CORS check for origin:', origin);
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Remove trailing slashes for comparison
-    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
-    
-    if (allowedOrigins.includes(normalizedOrigin)) {
-      return callback(null, true);
-    }
-    
-    const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-    console.error(msg);
-    return callback(new Error(msg), false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar']
-}));
-
+app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection with error handling
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
-
-// Add connection event handlers
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB database');
-});
+mongoose.connect(process.env.MONGO_URI);
 
 // Project routes
 app.post('/api/projects', async (req, res) => {
@@ -77,16 +29,10 @@ app.post('/api/projects', async (req, res) => {
 
 app.get('/api/projects', async (req, res) => {
   try {
-    console.log('Fetching projects...');
     const projects = await Project.find();
-    console.log(`Found ${projects.length} projects`);
     res.json(projects);
   } catch (err) {
-    console.error('Error fetching projects:', err);
-    res.status(500).json({ 
-      error: 'Failed to fetch projects',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+    res.status(500).json({ error: err.message });
   }
 });
 
