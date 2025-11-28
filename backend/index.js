@@ -7,7 +7,31 @@ const Project = require('./models/Project');
 const Task = require('./models/Task');
 
 const app = express();
-app.use(cors());
+
+// Configure CORS with allowed origins
+const allowedOrigins = [
+  'http://localhost:5173',  // Local development
+  'https://taskflowkj.netlify.app/',  // Your Netlify domain
+  'https://taskflow-v4pt.onrender.com/'  // Your Render backend domain
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      console.error(msg, { origin });
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI);
