@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Neucha&display=swap');
+
+.neucha {
+  font-family: "Neucha", cursive;
+  font-weight: 500;
+  font-style: normal;
+}
+
+@import "tailwindcss";
+
+body {
+  background: #15171a;
+  color: #f3f4f6;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #15171a;
+}
+::-webkit-scrollbar-thumb {
+  background: #23262b;
+  border-radius: 4px;
+}
